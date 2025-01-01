@@ -1,0 +1,35 @@
+const mongoose = require("mongoose");
+
+const businessSchema = new mongoose.Schema({
+  dateTime: { type: String, default: new Date().toISOString() },
+  referenceNo: { type: String, default: "" },
+  companyName: { type: String, required: true },
+  businessType: { type: String, required: true },
+  tradeLicenseNo: { type: String, required: true },
+  passportIdNo: String,
+  registrationPurpose: String,
+  email: { type: String, required: true, unique: true },
+  postalCode: String,
+  ownerFirstName: { type: String, required: true },
+  ownerMiddleName: String,
+  ownerLastName: { type: String, required: true },
+  residentialAddress: String,
+  ownerCountry: String,
+  ownerState: String,
+  ownerCity: String,
+  ownerPhoneNumber: String,
+  gender: String,
+  companyNationality: String,
+  companyState: String,
+  completOfficeAddress: String,
+  companyCity: String,
+  ownerAddress: String,
+  nationalityPhoneNumber: String,
+  residentPostalCode: String,
+  TradeCopy: String,
+  PassportIDCopy: String,
+  RequestLetter: String,
+  termsAccepted: { type: Boolean, required: true },
+}, { timestamps: true });
+
+module.exports = mongoose.model("Business", businessSchema);
