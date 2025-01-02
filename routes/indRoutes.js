@@ -5,19 +5,13 @@ const {
   updateUser,
   deleteUser,
 } = require("../controllers/indController");
-const { upload } = require("../middlewares/fileUpload");
+const upload = require("../middlewares/fileUpload");
 
 const router = express.Router();
 
-router.post("/", upload.fields([
-  { name: "PassportIDCopy", maxCount: 1 },
-  { name: "CurrentPicture", maxCount: 1 },
-]), createUser);
+router.post("/", upload, createUser);
 router.get("/:id", getUser);
-router.put("/:id", upload.fields([
-  { name: "PassportIDCopy", maxCount: 1 },
-  { name: "CurrentPicture", maxCount: 1 },
-]), updateUser);
+router.put("/:id", upload, updateUser);
 router.delete("/:id", deleteUser);
 
 module.exports = router;

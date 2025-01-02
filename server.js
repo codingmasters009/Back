@@ -3,9 +3,7 @@ const express = require("express");
 const cors = require("cors"); // Import the CORS middleware
 const connectDB = require("./config/db");
 const userRoutes = require("./routes/indRoutes");
-const businessRoutes = require("./routes/businessRoutes");
-const investorRoutes = require("./routes/investorRoutes");
-const salesPartnerRoutes = require("./routes/salespartnerRoutes");
+
 
 const app = express();
 
@@ -22,9 +20,7 @@ app.use(cors(corsOptions)); // Apply the CORS middleware
 
 // Routes
 app.use("/api/users", userRoutes);
-app.use("/api/business", businessRoutes);
-app.use("/api/investors", investorRoutes);
-app.use("/api/salespartners", salesPartnerRoutes);
+
 
 // Database Connection
 connectDB();

@@ -6,29 +6,38 @@ const crypto = require("crypto");
 
 
 exports.createUser = async (req, res) => {
-  const {
-    email,
-    firstName,
-    middleName,
-    lastName,
-    passportIdNo,
-    profession,
-    registrationPurpose,
-    residentialAddress,
-    residentialCountry,
-    state,
-    city,
-    personalPhoneNumber,
-    gender,
-    nationality,
-    nationalityState,
-    nationalityCity,
-    nationalityAddress,
-    nationalityPhoneNumber,
-    termsAccepted,
-  } = req.body;
-
   try {
+    console.log("Files received:", req.files);
+    console.log("Body received:", req.body);
+
+    const PassportIDCopyPath = req.files?.PassportIDCopy?.[0]?.path || null;
+    const CurrentPicturePath = req.files?.CurrentPicture?.[0]?.path || null;
+
+    if (!PassportIDCopyPath || !CurrentPicturePath) {
+      return res.status(400).json({ message: "Both files must be uploaded." });
+    }
+    const {
+      email,
+      firstName,
+      middleName,
+      lastName,
+      passportIdNo,
+      profession,
+      registrationPurpose,
+      residentialAddress,
+      residentialCountry,
+      residentialstate,
+      residentialcity,
+      personalPhoneNumber,
+      gender,
+      nationality,
+      nationalityState,
+      nationalityCity,
+      nationalityAddress,
+      nationalityPhoneNumber,
+      termsAccepted,
+    } = req.body;
+
     if (!termsAccepted) {
       return res.status(400).json({ message: "Terms must be accepted." });
     }
@@ -38,10 +47,8 @@ exports.createUser = async (req, res) => {
       return res.status(400).json({ message: "Email already exists." });
     }
 
-    // Generate Reference Number
-    const referenceNo = crypto.randomBytes(8).toString("hex");
+    const referenceNo = crypto.randomBytes(8).toString("hex"); // Generate reference number
 
-    // Save User Without File Paths
     const user = new User({
       email,
       firstName,
@@ -52,8 +59,8 @@ exports.createUser = async (req, res) => {
       registrationPurpose,
       residentialAddress,
       residentialCountry,
-      state,
-      city,
+      residentialstate,
+      residentialcity,
       personalPhoneNumber,
       gender,
       nationality,
@@ -61,38 +68,20 @@ exports.createUser = async (req, res) => {
       nationalityCity,
       nationalityAddress,
       nationalityPhoneNumber,
-      referenceNo,
+      PassportIDCopy: PassportIDCopyPath,
+      CurrentPicture: PassportIDCopyPath,
       termsAccepted,
+      referenceNo,
     });
 
-    const savedUser = await user.save();
-
-    // Handle File Upload Only After Successful User Creation
-    if (req.files?.PassportIDCopy?.[0]) {
-      const result = await cloudinary.uploader.upload(
-        req.files.PassportIDCopy[0].path
-      );
-      savedUser.PassportIDCopy = result.secure_url;
-    }
-    if (req.files?.CurrentPicture?.[0]) {
-      const result = await cloudinary.uploader.upload(
-        req.files.CurrentPicture[0].path
-      );
-      savedUser.CurrentPicture = result.secure_url;
-    }
-
-    await savedUser.save();
+    await user.save();
+    console.log("Uploaded PassportIDCopy path:", PassportIDCopyPath);
+    console.log("Uploaded CurrentPicture path:", CurrentPicturePath);
+    // Send verification email
     await sendVerificationEmail(email, referenceNo);
-    res.status(201).json({ message: "User created successfully", savedUser });
-  } catch (error) {
-    // Cleanup Uploaded Files in Case of Errors
-    if (req.files?.PassportIDCopy?.[0]?.path) {
-      await cloudinary.uploader.destroy(req.files.PassportIDCopy[0].path);
-    }
-    if (req.files?.CurrentPicture?.[0]?.path) {
-      await cloudinary.uploader.destroy(req.files.CurrentPicture[0].path);
-    }
 
+    res.status(201).json({ message: "User created successfully", user });
+  } catch (error) {
     res.status(500).json({ message: "Internal server error", error: error.message });
   }
 };
@@ -130,4 +119,4 @@ exports.deleteUser = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: "Internal server error", error: error.message });
   }
-};
+}
