@@ -5,19 +5,15 @@ const {
   updateInvestor,
   deleteInvestor,
 } = require("../controllers/investorController");
-const { upload } = require("../middlewares/fileUpload");
+const { upload1 } = require("../middlewares/fileUpload");
+const { validateUserCreation } = require('../validators/indvitulValidator');
 
 const router = express.Router();
 
-router.post("/", upload.fields([
-  { name: "PassportIDCopy", maxCount: 1 },
-  { name: "CurrentPicture", maxCount: 1 },
-]), createInvestor);
+router.post("/", validateUserCreation, upload1, createInvestor);
 router.get("/:id", getInvestor);
-router.put("/:id", upload.fields([
-  { name: "PassportIDCopy", maxCount: 1 },
-  { name: "CurrentPicture", maxCount: 1 },
-]), updateInvestor);
+router.put("/:id", upload1, updateInvestor);
 router.delete("/:id", deleteInvestor);
 
 module.exports = router;
+

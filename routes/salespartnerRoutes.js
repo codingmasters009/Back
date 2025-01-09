@@ -5,21 +5,14 @@ const {
   updateSalesPartner,
   deleteSalesPartner,
 } = require("../controllers/salespartnerController");
-const { upload } = require("../middlewares/fileUpload");
+const { slaespartnerupload } = require("../middlewares/fileUpload");
+const { validateSalesPartnerCreation } = require('../validators/salespartenerValidator');
 
 const router = express.Router();
 
-router.post("/", upload.fields([
-  { name: "PassportIDCopy", maxCount: 1 },
-  { name: "CurrentPicture", maxCount: 1 },
-  { name: "ExperianceProfile", maxCount: 1 },
-]), createSalesPartner);
+router.post("/", validateSalesPartnerCreation, slaespartnerupload, createSalesPartner);
 router.get("/:id", getSalesPartner);
-router.put("/:id", upload.fields([
-  { name: "PassportIDCopy", maxCount: 1 },
-  { name: "CurrentPicture", maxCount: 1 },
-  { name: "ExperianceProfile", maxCount: 1 },
-]), updateSalesPartner);
+router.put("/:id", slaespartnerupload, updateSalesPartner);
 router.delete("/:id", deleteSalesPartner);
 
 module.exports = router;

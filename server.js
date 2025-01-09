@@ -1,26 +1,23 @@
 require("dotenv").config();
 const express = require("express");
-const cors = require("cors"); // Import the CORS middleware
+const cors = require("cors"); 
 const connectDB = require("./config/db");
-const userRoutes = require("./routes/indRoutes");
-
-
+const indivitualRoutes = require("./routes/indRoutes");
+const bussinesRoutes = require("./routes/businessRoutes");
+const investorRoutes = require("./routes/investorRoutes"); 
+const salespartnerRoutes = require("./routes/salespartnerRoutes");
 const app = express();
 
 // Middleware
 app.use(express.json());
+app.use(cors());
 
-// Configure CORS
-const corsOptions = {
-  origin: "*", // Replace '*' with specific origins if needed for security
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  allowedHeaders: ["Content-Type", "Authorization"],
-};
-app.use(cors(corsOptions)); // Apply the CORS middleware
 
 // Routes
-app.use("/api/users", userRoutes);
-
+app.use("/api/indivitual", indivitualRoutes);
+app.use("/api/bussines", bussinesRoutes);
+app.use("/api/investors",investorRoutes);
+app.use("/api/salespartner",salespartnerRoutes);
 
 // Database Connection
 connectDB();

@@ -12,7 +12,19 @@ const storage = new CloudinaryStorage({
 
 const upload = multer({ storage });
 
-module.exports = upload.fields([
+exports.upload1 = upload.fields([
   { name: "PassportIDCopy", maxCount: 1 },
   { name: "CurrentPicture", maxCount: 1 },
+]);
+
+exports.bussinesupload = upload.fields([
+  { name: "TradeCopy", maxCount: 1 },
+  { name: "RequestLetter", maxCount: 1 },
+  { name: "PassportIDCopy", maxCount: 1 },
+]);
+
+exports.slaespartnerupload = upload.fields([
+  { name: 'PassportIDCopy', maxCount: 1 },
+  { name: 'CurrentPicture', maxCount: 1 },
+  { name: 'ExperianceProfile', maxCount: 1 },
 ]);

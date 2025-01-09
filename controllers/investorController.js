@@ -2,133 +2,69 @@ const Investor = require("../models/investor");
 const sendVerificationEmail = require("../config/mailer");
 const crypto = require("crypto");
 
-exports.createInvestor = async (req, res) => {
-  const {
-    email,
-    firstName,
-    middleName,
-    lastName,
-    passportIdNo,
-    profession,
-    investType,
-    investVol,
-    investmentInt,
-    investmentStartDate,
-    registrationPurpose,
-    nationality,
-    nationalityState,
-    nationalityCity,
-    nationalityAddress,
-    nationalityPhoneNumber,
-    businessName,
-    residentialCountry,
-    residentialState,
-    residentialCity,
-    personalPhoneNumber,
-    termsAccepted,
-  } = req.body;
-
+exports.createInvestor = async (req, res, next) => {
+  
   try {
-    if (!termsAccepted) {
-      return res.status(400).json({ message: "Terms must be accepted." });
-    }
+    const PassportIDCopyPath = req.files?.PassportIDCopy?.[0]?.path;
+    const CurrentPicturePath = req.files?.CurrentPicture?.[0]?.path;
 
-    const existingInvestor = await Investor.findOne({ email });
+    const existingInvestor = await Investor.findOne({  email: req.body.email });
     if (existingInvestor) {
       return res.status(400).json({ message: "Email already exists." });
     }
 
-    // Generate Reference Number
-    const referenceNo = crypto.randomBytes(8).toString("hex");
-
     const investor = new Investor({
-      email,
-      firstName,
-      middleName,
-      lastName,
-      passportIdNo,
-      profession,
-      investType,
-      investVol,
-      investmentInt,
-      investmentStartDate,
-      registrationPurpose,
-      nationality,
-      nationalityState,
-      nationalityCity,
-      nationalityAddress,
-      nationalityPhoneNumber,
-      businessName,
-      residentialCountry,
-      residentialState,
-      residentialCity,
-      personalPhoneNumber,
-      referenceNo,
-      termsAccepted,
+      ...req.body,
+      PassportIDCopy: PassportIDCopyPath,
+      CurrentPicture: CurrentPicturePath,
+      
     });
 
-    const savedInvestor = await investor.save();
+     await investor.save();
+    await sendVerificationEmail( req.body.email, req.body.referenceNo);
 
-    if (req.files?.PassportIDCopy?.[0]) {
-      const result = await cloudinary.uploader.upload(
-        req.files.PassportIDCopy[0].path
-      );
-      savedInvestor.PassportIDCopy = result.secure_url;
-    }
-    if (req.files?.CurrentPicture?.[0]) {
-      const result = await cloudinary.uploader.upload(
-        req.files.CurrentPicture[0].path
-      );
-      savedInvestor.CurrentPicture = result.secure_url;
-    }
-
-    await savedInvestor.save();
-    await sendVerificationEmail(email, referenceNo);
-    res.status(201).json({ message: "Investor created successfully", savedInvestor });
+    res.status(201).json({ message: "Investor created successfully", investor });
   } catch (error) {
-    if (req.files?.PassportIDCopy?.[0]?.path) {
-      await cloudinary.uploader.destroy(req.files.PassportIDCopy[0].path);
-    }
-    if (req.files?.CurrentPicture?.[0]?.path) {
-      await cloudinary.uploader.destroy(req.files.CurrentPicture[0].path);
-    }
-
-    res.status(500).json({ message: "Internal server error", error: error.message });
+    next(error); 
   }
 };
 
-exports.getInvestor = async (req, res) => {
+exports.getInvestor = async (req, res, nest) => {
   try {
     const investor = await Investor.findById(req.params.id);
     if (!investor) return res.status(404).json({ message: "Investor not found." });
+    
     res.status(200).json(investor);
   } catch (error) {
-    res.status(500).json({ message: "Internal server error", error: error.message });
+    next(error);
   }
 };
 
-exports.updateInvestor = async (req, res) => {
+exports.updateInvestor = async (req, res, next) => {
   try {
     const updates = req.body;
     if (req.files) {
       updates.PassportIDCopy = req.files.PassportIDCopy?.[0]?.path;
       updates.CurrentPicture = req.files.CurrentPicture?.[0]?.path;
     }
+
     const investor = await Investor.findByIdAndUpdate(req.params.id, updates, { new: true });
     if (!investor) return res.status(404).json({ message: "Investor not found." });
+    
     res.status(200).json({ message: "Investor updated successfully", investor });
   } catch (error) {
-    res.status(500).json({ message: "Internal server error", error: error.message });
+    next(error);
   }
 };
 
-exports.deleteInvestor = async (req, res) => {
+exports.deleteInvestor = async (req, res, next) => {
   try {
     const investor = await Investor.findByIdAndDelete(req.params.id);
     if (!investor) return res.status(404).json({ message: "Investor not found." });
+   
     res.status(200).json({ message: "Investor deleted successfully." });
   } catch (error) {
-    res.status(500).json({ message: "Internal server error", error: error.message });
+    next(error);
   }
 };
 
